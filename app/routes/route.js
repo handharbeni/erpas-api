@@ -21,6 +21,7 @@ module.exports = function(app) {
     var account = require('../controllers/account.controller');
     var misc = require('../controllers/misc.controller');
     var payment = require('../controllers/payment.controller');
+    var kios = require('../controllers/kios.controller')
 
     // var account = require('../controllers/account.controller');
     // var company = require('../controllers/company.controller');
@@ -51,4 +52,9 @@ module.exports = function(app) {
     app.route('/config').post(token, misc.addConfig).get(token, misc.getConfig).put(token, misc.updateConfig).delete(general.index);
     app.route('/block').post(token, misc.addBlock).get(token, misc.getBlock).put(token, misc.updateBlock).delete(general.index);
     app.route('/tenant').post(token, misc.addTenant).get(token, misc.getTenant).put(token, misc.updateTenant).delete(general.index);
+
+    app.route('/kios').post(token, kios.addKios).get(token, kios.dataKios).put(general.index).delete(general.index);
+    app.route('/kios/utility').post(general.index).get(token, kios.utilitasKios).put(general.index).delete(general.index);
+
+    app.route('/pay/retribution').post(token, payment.payRetribution).get(token, misc.getTenant).put(token, misc.updateTenant).delete(general.index);
 }

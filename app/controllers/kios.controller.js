@@ -5,6 +5,18 @@ var db = require('../../knex/knex');
 var Utils = require('../utils/utils');
 var bcrypt = require('bcryptjs');
 
+/**
+ * @route POST /kios
+ * @group Kios
+ * @param {string} config_id.query.required - Configuration Id
+ * @param {string} block_id.query.required - Block Id
+ * @param {string} store_number.query.required - Store Number
+ * @param {string} price_rent.query.required - Price Rent
+ * @returns {object} 200 - { "success": true, "message": "Message Success, Message Error", "data": "if any, could be object / json" }
+ * @produces application/json
+ * @consumes application/x-www-form-urlencoded
+ * @security JWT
+ */
 exports.addKios = (req, res) => {
     var response = {};
     var userId = req.userId
@@ -39,18 +51,27 @@ exports.addKios = (req, res) => {
         });
 }
 
+
+/**
+ * @route GET /kios
+ * @group Kios
+ * @returns {object} 200 - { "success": true, "message": "Message Success, Message Error", "data": "if any, could be object / json" }
+ * @produces application/json
+ * @consumes application/x-www-form-urlencoded
+ * @security JWT
+ */
 exports.dataKios = (req, res) => {
     var response = {}
     var userId = req.userId
 
     db('store')
-        .then(async (rowStore => {
+        .then(async (rowStore) => {
             if(rowStore.length > 0){
                 response = { success: true, message: 'Detail Found', data: rowStore }
             } else {
                 response = { success: false, message:'Data Not Found' }
             }
-        }))
+        })
         .catch(error => {
             response = { success: false, message: 'Cannot Getting Data Kios / Store', data: error }
         })
@@ -59,6 +80,16 @@ exports.dataKios = (req, res) => {
         });
 }
 
+/**
+ * @route GET /kios/utility
+ * @group Kios
+ * @param {string} kios_id.query.required - Kios ID
+ * @param {string} utility_id.query.required - Utility ID
+ * @returns {object} 200 - { "success": true, "message": "Message Success, Message Error", "data": "if any, could be object / json" }
+ * @produces application/json
+ * @consumes application/x-www-form-urlencoded
+ * @security JWT
+ */
 exports.utilitasKios = (req, res) => {
     var response = {}
     var userId = req.userId
@@ -72,7 +103,7 @@ exports.utilitasKios = (req, res) => {
 
     db('store_utility')
         .where(dataSelect)
-        .then(async (row) => {
+        .then(async (rowStore) => {
             if(rowStore.length > 0){
                 response = { success: true, message: 'Utility Found', data: rowStore }
             } else {
