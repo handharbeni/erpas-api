@@ -82,7 +82,7 @@ exports.dataKios = (req, res) => {
 
 /**
  * @route GET /kios/utility
- * @group Kios
+ * @group Kios Utility
  * @param {string} kios_id.query.required - Kios ID
  * @param {string} utility_id.query.required - Utility ID
  * @returns {object} 200 - { "success": true, "message": "Message Success, Message Error", "data": "if any, could be object / json" }
@@ -112,6 +112,110 @@ exports.utilitasKios = (req, res) => {
         })
         .catch(error => {
             response = { success: false, message: 'Cannot Getting Data Kios / Store', data: error }
+        })
+        .finally(() => {
+            Utils.sendStatus(res, 200, response)
+        });
+}
+
+
+/**
+ * @route POST /kios/utility
+ * @group Kios Utility
+ * @param {string} kios_id.query.required - Kios ID
+ * @param {string} utility_id.query.required - Utility ID
+ * @param {string} value.query.required - Value
+ * @returns {object} 200 - { "success": true, "message": "Message Success, Message Error", "data": "if any, could be object / json" }
+ * @produces application/json
+ * @consumes application/x-www-form-urlencoded
+ * @security JWT
+ */
+exports.addKiosUtility = (req, res) => {
+    var response = {}
+    var userId = req.userId
+    var kiosId = req.query.kios_id
+    var utilityId = req.query.utility_id
+    var value = req.query.value
+
+    var dataInsert = {
+        user_id: userId,
+        store_id: kiosId,
+        utility_id: utilityId,
+        value: value
+    }
+
+    var dataSelect = {
+        store_id: kiosId,
+        utility_id: utilityId
+    }
+
+    db('store_utility')
+        .where(dataSelect)
+        .then(async (rowStore) => {
+            if(rowStore.length > 0){
+                response = { success: true, message: 'Utility Found', data: rowStore }
+            } else {
+                await db('store_utility')
+                    .insert(dataInsert)
+                    .returning('id')
+                    .then( id => {
+                        response = { success: true, message:'Success Setup Store Utility / Store' }
+                    })
+                    .catch(error => {
+                        response = { success: false, message: 'Error Setup Utility', data: error }
+                    })
+                    .finally(() => {
+                        return response
+                    })
+            }
+        })
+        .catch(error => {
+            response = { success: false, message: 'Cannot Getting Data Kios / Store', data: error }
+        })
+        .finally(() => {
+            Utils.sendStatus(res, 200, response)
+        });
+}
+
+
+/**
+ * @route PUT /kios/utility
+ * @group Kios Utility
+ * @param {string} kios_id.query.required - Kios ID
+ * @param {string} utility_id.query.required - Utility ID
+ * @param {string} value.query.required - Value
+ * @returns {object} 200 - { "success": true, "message": "Message Success, Message Error", "data": "if any, could be object / json" }
+ * @produces application/json
+ * @consumes application/x-www-form-urlencoded
+ * @security JWT
+ */
+exports.updateKiosUtility = (req, res) => {
+    var response = {}
+    var userId = req.userId
+    var kiosId = req.query.kios_id
+    var utilityId = req.query.utility_id
+    var value = req.query.value
+
+    var dataUpdate = {
+        user_id: userId,
+        store_id: kiosId,
+        utility_id: utilityId,
+        value: value
+    }
+
+    var dataSelect = {
+        store_id: kiosId,
+        utility_id: utilityId
+    }
+
+    db('store_utility')
+        .where(dataSelect)
+        .update(dataUpdate)
+        .then( id => {
+            response = { success: true, message:'Success Update Store Utility / Store', data:id }
+        })
+        .catch(error => {
+            response = { success: false, message: 'Error Update Utility', data: error }
         })
         .finally(() => {
             Utils.sendStatus(res, 200, response)
