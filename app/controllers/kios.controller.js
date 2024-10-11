@@ -221,3 +221,99 @@ exports.updateKiosUtility = (req, res) => {
             Utils.sendStatus(res, 200, response)
         });
 }
+
+
+/**
+ * @route POST /kios/sewa
+ * @group Kios
+ * @param {string} store_id.query.required - Store ID
+ * @param {string} store_number.query.required - Store Number
+ * @param {string} tenant_name.query.required - Tenant Name
+ * @param {string} tenant_address.query.required - Tenant Address
+ * @param {string} start.query.required - Start
+ * @param {string} end.query.required - End
+ * @returns {object} 200 - { "success": true, "message": "Message Success, Message Error", "data": "if any, could be object / json" }
+ * @produces application/json
+ * @consumes application/x-www-form-urlencoded
+ * @security JWT
+ */
+exports.sewaKios = (req, res) => {
+    var response = {};
+    var userId = req.userId
+
+    var storeId = req.query.store_id
+    var storeNumber = req.query.store_number
+    var tenantName = req.query.tenant_name
+    var tenantAddress = req.query.tenant_address
+    var start = req.query.start
+    var end = req.query.end
+
+    var dataSelectTenant = {
+        name: tenantName,
+        address: tenantAddress
+    }
+
+    var dataInsertTenant = {
+        user_id: userId,
+        name: tenantName,
+        address: tenantAddress
+    }
+
+    var dataSelectKios = {
+        id: userId
+    }
+    var dataInsertKios = {
+        store_id: storeId,
+        user_id: userId,
+        start: start,
+        end: end
+    }
+
+    db('tenant_data')
+        .where(dataSelectTenant)
+        .then(async (result) => {
+            if (result.length > 0) {
+                var tenantId = result[0].id
+                dataInsertKios['tenant_id'] = tenantId
+                await db('store_transaction')
+                    .insert(dataInsertKios)
+                    .returning('id')
+                    .then(id => {
+                        response = { success: true, message: 'Rent Success, Please go to payment / Generate Billing', data: id }
+                    })
+                    .catch(error => {
+                        response = { success: false, message: 'Rent Error', data: error }
+                    })
+            } else {
+                await db('tenant_data')
+                    .insert(dataInsertTenant)
+                    .returning('id')
+                    .then(async (id) => {
+                        var tenantId = id[0].id
+                        dataInsertKios['tenant_id'] = tenantId
+                        console.log(dataInsertKios)
+                        await db('store_transaction')
+                            .insert(dataInsertKios)
+                            .returning('id')
+                            .then(id => {
+                                response = { success: true, message: 'Rent Success, Please go to payment / Generate Billing', data: id }
+                            })
+                            .catch(error => {
+                                console.log(error)
+                                response = { success: false, message: 'Rent Error', data: error }
+                            })    
+                    })
+                    .catch(error => {
+                        response = { success: false, message: 'Error Adding Tenant', data: error }
+                    })
+
+            }
+        })
+        .catch(error => {
+            console.log(error)
+            response = { success: false, message: 'Error Add Tenant', data: error }
+        })
+        .finally(() => {
+            Utils.sendStatus(res, 200, response);
+        })
+}

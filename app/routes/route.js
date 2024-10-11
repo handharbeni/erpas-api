@@ -55,6 +55,8 @@ module.exports = function(app) {
 
     app.route('/kios').post(token, kios.addKios).get(token, kios.dataKios).put(general.index).delete(general.index);
     app.route('/kios/utility').post(token, kios.addKiosUtility).get(token, kios.utilitasKios).put(token, kios.updateKiosUtility).delete(general.index);
+    app.route('/kios/sewa').post(token, kios.sewaKios).get(general.index).put(general.index).delete(general.index);
 
-    app.route('/pay/retribution').post(token, payment.payRetribution).get(token, misc.getTenant).put(token, misc.updateTenant).delete(general.index);
+    app.route('/pay/retribution').post(token, payment.payRetribution).get(general.index).put(general.index).delete(general.index);
+    app.route('/pay/rent').post(token, payment.payRent).get(general.index).put(general.index).delete(general.index);
 }
